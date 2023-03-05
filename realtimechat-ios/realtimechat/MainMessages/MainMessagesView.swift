@@ -8,20 +8,20 @@
 import SwiftUI
 import SDWebImageSwiftUI
 
-struct ChatUser {
-    let uid, email, imageProfileUrl: String
-}
-
 class MainMessagesViewModel: ObservableObject {
     
     @Published var errorMessage = ""
     @Published var chatUser: ChatUser?
     
     init() {
+        DispatchQueue.main.async {
+            self.isUserCurrentlyLoggedOut = FirebaseManager.shared.auth.currentUser?.uid == nil
+        }
+        
         fetchCurrentUser()
     }
     
-    private func fetchCurrentUser() {
+    func fetchCurrentUser() {
         guard let uid = FirebaseManager.shared.auth
             .currentUser?.uid
             else {
@@ -40,10 +40,16 @@ class MainMessagesViewModel: ObservableObject {
                 }
                 
                 guard let data = snapshot?.data() else { return }
-                let email = data["email"] as? String ?? ""
-                let imageProfileUrl = data["imageProfileUrl"] as? String ?? ""
-                self.chatUser = ChatUser(uid: uid, email: email, imageProfileUrl: imageProfileUrl)
+                
+                self.chatUser = .init(data: data)
             }
+    }
+    
+    @Published var isUserCurrentlyLoggedOut = false
+    
+    func handleSignOut() {
+        self.isUserCurrentlyLoggedOut = true
+        try? FirebaseManager.shared.auth.signOut()
     }
 }
 
@@ -79,7 +85,7 @@ struct MainMessagesView: View {
                 .shadow(radius: 5)
 
             VStack (alignment: .leading, spacing: 4) {
-                var username = vm.chatUser?.email ?? ""
+                let username = vm.chatUser?.email ?? ""
                 Text(username.components(separatedBy: "@")[0])
                     .font(.system(size: 16, weight: .bold))
                 HStack {
@@ -106,10 +112,15 @@ struct MainMessagesView: View {
             .init(title: Text("Settings"), message:
                     Text("What do you want to do?"), buttons: [
                         .destructive(Text("Sign Out"), action: {
-                            print("Handle sign out")
+                            vm.handleSignOut()
                         }),
                         .cancel()
                     ])
+        }.fullScreenCover(isPresented: $vm.isUserCurrentlyLoggedOut, onDismiss: nil) {
+            LoginAndRegisterView(didCompleteLoginProgress: {
+                self.vm.fetchCurrentUser()
+                self.vm.isUserCurrentlyLoggedOut = false
+            })
         }
     }
     

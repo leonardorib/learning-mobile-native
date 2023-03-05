@@ -9,11 +9,13 @@ import SwiftUI
 
 struct LoginAndRegisterView: View {
     
-    @State var isLoginMode = false
-    @State var email = ""
-    @State var password = ""
+    let didCompleteLoginProgress: () -> ()
     
-    @State var shouldShowImagePicker = false
+    @State private var isLoginMode = true
+    @State private var email = ""
+    @State private var password = ""
+    
+    @State private var shouldShowImagePicker = false
     
     var body: some View {
         NavigationView {
@@ -102,6 +104,9 @@ struct LoginAndRegisterView: View {
     @State var statusMessage = ""
     
     private func createNewAccount() {
+        if self.image == nil {
+            self.statusMessage = "You must select an avatar image"
+        }
         FirebaseManager.shared.auth.createUser(withEmail: email, password: password) {
             result, err in
             if let err = err {
@@ -122,6 +127,8 @@ struct LoginAndRegisterView: View {
                 return
             }
             self.statusMessage = "Sucessfully logged in as user: \(result?.user.uid ?? "")"
+            
+            self.didCompleteLoginProgress()
             
         }
     }
@@ -165,13 +172,16 @@ struct LoginAndRegisterView: View {
                     self.statusMessage = "\(err)"
                     return
                 }
-                print("Sucess")
+                
+                self.didCompleteLoginProgress()
             }
     }
 }
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        LoginAndRegisterView()
+        LoginAndRegisterView(didCompleteLoginProgress: {
+            
+        })
     }
 }
