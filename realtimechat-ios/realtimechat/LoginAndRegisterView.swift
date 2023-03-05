@@ -63,10 +63,10 @@ struct LoginAndRegisterView: View {
                                     Image(systemName: "person.fill")
                                         .font(.system(size: 64))
                                         .padding()
-                                        .foregroundColor(.black)
+                                        .foregroundColor(Color(.label))
                                 }
                             }
-                            .overlay(RoundedRectangle(cornerRadius: 64).stroke(Color.black, lineWidth: 3))
+                            .overlay(RoundedRectangle(cornerRadius: 64).stroke(Color(.label), lineWidth: 3))
                         }
                     }
                     
