@@ -85,8 +85,7 @@ struct MainMessagesView: View {
                 .shadow(radius: 5)
 
             VStack (alignment: .leading, spacing: 4) {
-                let username = vm.chatUser?.email ?? ""
-                Text(username.components(separatedBy: "@")[0])
+                Text(vm.chatUser?.username ?? "")
                     .font(.system(size: 16, weight: .bold))
                 HStack {
                     Circle()
@@ -155,9 +154,11 @@ struct MainMessagesView: View {
         }
     }
     
+    @State var shouldShowNewMessageScreen = false
+    
     private var newMessageButton: some View {
         Button {
-            
+            shouldShowNewMessageScreen.toggle()
         } label: {
             HStack {
                 Spacer()
@@ -172,6 +173,8 @@ struct MainMessagesView: View {
                 .padding(.horizontal)
                 .shadow(radius: 15)
                 
+        }.fullScreenCover(isPresented: $shouldShowNewMessageScreen) {
+            CreateNewMessageView()
         }
     }
     
