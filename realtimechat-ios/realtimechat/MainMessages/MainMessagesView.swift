@@ -57,10 +57,12 @@ class MainMessagesViewModel: ObservableObject {
 struct MainMessagesView: View {
     @State var shouldShowLogoutOptions = false
     
+    @State var shouldNavigateToChatLogView = false
+    
     @ObservedObject private var vm = MainMessagesViewModel()
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack {
                 customNavbar
                 messagesView
@@ -70,6 +72,10 @@ struct MainMessagesView: View {
                 alignment: .bottom
             )
             .navigationBarHidden(true)
+            .navigationDestination(isPresented: $shouldNavigateToChatLogView) {
+                ChatLogView(chatUser: self.chatUser)
+            }
+            
         }
     }
     
@@ -174,11 +180,28 @@ struct MainMessagesView: View {
                 .shadow(radius: 15)
                 
         }.fullScreenCover(isPresented: $shouldShowNewMessageScreen) {
-            CreateNewMessageView()
+            CreateNewMessageView(didSelectNewUser: {
+                user in
+                self.shouldNavigateToChatLogView.toggle()
+                self.chatUser = user
+            })
         }
     }
     
-   
+    @State var chatUser: ChatUser?
+}
+
+struct ChatLogView: View {
+    let chatUser: ChatUser?
+    
+    var body: some View {
+        ScrollView {
+            ForEach(0..<10) {num in
+                Text("FAKE MESSAGE FOR NOW")
+            }
+        }.navigationTitle(chatUser?.username ?? "")
+            .navigationBarTitleDisplayMode(.inline)
+    }
 }
 
 struct MainMessagesView_Previews: PreviewProvider {
