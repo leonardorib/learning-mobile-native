@@ -57,14 +57,14 @@ struct LoginAndRegisterView: View {
                             .keyboardType(.emailAddress)
                             .autocapitalization(.none)
                             .disableAutocorrection(true)
-                        
-                        
-                        
+
                         SecureField("Password", text: $password)
                         
                     }
                     .padding(12)
-                    .background(Color.white)
+                    .foregroundColor(Color(.label))
+                    .background(Color(.systemFill))
+        
                     
                     Button {
                         handleAction()
